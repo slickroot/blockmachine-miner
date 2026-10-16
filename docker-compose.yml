@@ -51,7 +51,7 @@ services:
       METRICS_PORT: ${METRICS_PORT:-9100}
       METRICS_SECRET_V1: ${SECRET_V1}
       METRICS_SECRET_V2: ${SECRET_V2:-}
-      NODE_RPC_URL: http://${BACKEND_HOST:-host.docker.internal}:${BACKEND_PORT:-9944}
+      NODE_RPC_URL: http://mainnet-lite:9944
       NODE_NATIVE_METRICS_URL: ${NODE_NATIVE_METRICS_URL:-}
       GATEWAY_HEALTH_URL: http://gateway/health
       HOST_PROC_PATH: /host/proc
@@ -63,5 +63,28 @@ services:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
+  mainnet-lite:
+    image: ghcr.io/raofoundation/subtensor:latest
+    cpu_count: 4
+    mem_limit: 40000000000
+    memswap_limit: 80000000000
+    container_name: subtensor-mainnet-lite
+    ports:
+      - "127.0.0.1:9944:9944"
+    volumes:
+      - mainnet-lite-volume:/data
+    command:
+      - --base-path=/data
+      - --chain=./chainspecs/raw_spec_finney.json
+      - --rpc-external
+      - --rpc-max-connections 2000
+      - --rpc-cors=all
+      - --no-mdns
+      - --bootnodes=/dns/bootnode.finney.chain.opentensor.ai/tcp/30333/ws/p2p/12D3KooWRwbMb85RWnT8DSXSYMWQtuDwh4LJzndoRrTDotTR5gDC
+      - --sync=warp
+      - --database paritydb
+      - --db-cache 1024
+
 volumes:
   certbot_webroot:
+  mainnet-lite-volume:
